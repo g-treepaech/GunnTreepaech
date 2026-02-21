@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion'
-import { Moon, Sun, ChevronDown, ArrowUp, Github, Linkedin, Twitter, CheckCircle2, FileText, Mail, Phone, MapPin, GraduationCap, Award, X, ExternalLink } from 'lucide-react'
+import { Moon, Sun, ChevronDown, ArrowUp, Github, Linkedin, Twitter, CheckCircle2, FileText, Mail, Phone, MapPin, GraduationCap, Award, Languages } from 'lucide-react'
+import { useTranslation, Trans } from 'react-i18next'
 
 // Images
 import InternshipImg from './image/Internship.jpg'
@@ -12,52 +13,48 @@ import BleImg from './image/BleWirelessConnectionSystem.png'
 import MyImg from './image/My.jpg'
 import CVFile from './Documents/Treepaech_CV.pdf'
 
-// Real Data
-const startYear = 2020;
-const currentYear = 2024;
-const timelineData = {
-    2022: {
-        title: "Health Manage Calendar",
-        description: "Developed a comprehensive to-do management system designed to help users track health-related tasks.",
-        achievements: [
-            "Implemented a dynamic calendar interface",
-            "Built a task reminding system for due dates",
-            "Integrated time management recommendations"
-        ],
-        image: ProjectACPImg
-    },
-    2023: {
-        title: "Programmer Internship & AI Projects",
-        description: "Gained professional experience at PlaySmart IoT and explored AI and BLE technologies.",
-        achievements: [
-            "Internship: Developed IoT data display and storage websites",
-            "Co-authored: Tested and corrected code for 'Developing IoT on ESP32' book",
-            "Garbage Classification: Built a Vision AI model for waste sorting",
-            "BLE Connection: Developed NRF52840 wireless control system",
-            "Home Loan App: Created a 3-year repayment simulation tool"
-        ],
-        image: InternshipImg
-    },
-    2024: {
-        title: "Senior Project: CNI Performance Study",
-        description: "Conducted in-depth research and testing on Container Network Interfaces for Kubernetes.",
-        achievements: [
-            "Analyzed Calico, Flannel, and Cilium performance",
-            "Conducted tests on physical Raspberry Pi 4 hardware",
-            "Utilized virtual simulators for large-scale testing"
-        ],
-        image: SeniorProjectImg
-    }
-};
+import TimelineCard from './components/TimelineCard'
+import YearSection from './components/YearSection'
+import ProjectModal from './components/ProjectModal'
 
 const years = [2022, 2023, 2024];
+
+// Year Components (Outside App to prevent re-creation/re-mounting)
+const Year2022 = ({ onViewDetails }) => (
+    <YearSection year={2022}>
+        <TimelineCard index={0} item={{ image: ProjectACPImg, key: 'healthCalendar' }} onViewDetails={onViewDetails} />
+    </YearSection>
+);
+
+const Year2023 = ({ onViewDetails }) => (
+    <YearSection year={2023}>
+        <TimelineCard index={1} item={{ image: InternshipImg, key: 'internship' }} onViewDetails={onViewDetails} />
+        <TimelineCard index={2} item={{ image: AIMiniprojectImg, key: 'garbageAI' }} onViewDetails={onViewDetails} />
+        <TimelineCard index={3} item={{ image: BleImg, key: 'bleControl' }} onViewDetails={onViewDetails} />
+        <TimelineCard index={4} item={{ image: ProjectCloudAppImg, key: 'homeLoan' }} onViewDetails={onViewDetails} />
+    </YearSection>
+);
+
+const Year2024 = ({ onViewDetails }) => (
+    <YearSection year={2024}>
+        <TimelineCard index={5} item={{ image: SeniorProjectImg, key: 'seniorProject' }} onViewDetails={onViewDetails} />
+    </YearSection>
+);
 
 export default function App() {
     const [isDark, setIsDark] = useState(false);
     const [showBackToTop, setShowBackToTop] = useState(false);
     const [selectedProject, setSelectedProject] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const { t, i18n } = useTranslation();
     const { scrollYProgress } = useScroll();
     const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+
+    const handleViewDetails = (project) => {
+        setSelectedProject(project);
+        setIsModalOpen(true);
+    };
 
     useEffect(() => {
         const theme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -82,6 +79,11 @@ export default function App() {
         else document.documentElement.classList.remove('dark');
     };
 
+    const toggleLanguage = () => {
+        const newLang = i18n.language === 'en' ? 'th' : 'en';
+        i18n.changeLanguage(newLang);
+    };
+
     return (
         <div className={`min-h-screen ${isDark ? 'dark bg-slate-900 text-slate-100' : 'bg-slate-50 text-slate-900'} transition-colors duration-300`}>
             {/* Progress Bar */}
@@ -95,14 +97,27 @@ export default function App() {
                 <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
                     <div className="font-extrabold text-xl tracking-tighter text-blue-600">TREEPAECH.T</div>
                     <div className="hidden md:flex gap-6 items-center">
-                        <a href="#about" className="text-sm font-semibold hover:text-blue-500 transition-colors">About</a>
+                        <a href="#about" className="text-sm font-semibold hover:text-blue-500 transition-colors">{t('nav.about')}</a>
                         {years.map(y => (
                             <a key={y} href={`#year-${y}`} className="text-sm font-semibold hover:text-blue-500 transition-colors">{y}</a>
                         ))}
                     </div>
                     <div className="flex items-center gap-4">
+                        <button onClick={toggleLanguage} className="flex items-center gap-3 px-3 h-9 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-[10px] font-bold uppercase tracking-[0.2em] shadow-sm">
+                            {i18n.language === 'en' ? (
+                                <div className="flex items-center gap-2">
+                                    <img src="https://flagcdn.com/w20/th.png" srcSet="https://flagcdn.com/w40/th.png 2x" width="22" alt="Thai" className="rounded-sm shadow-sm" />
+                                    <span className="leading-none">TH</span>
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2">
+                                    <img src="https://flagcdn.com/w20/us.png" srcSet="https://flagcdn.com/w40/us.png 2x" width="22" alt="English" className="rounded-sm shadow-sm" />
+                                    <span className="leading-none">EN</span>
+                                </div>
+                            )}
+                        </button>
                         <a href={CVFile} download className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-full transition-all">
-                            <FileText className="w-4 h-4" /> Download CV
+                            <FileText className="w-4 h-4" /> {t('nav.downloadCV')}
                         </a>
                         <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                             {isDark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
@@ -112,7 +127,7 @@ export default function App() {
             </nav>
 
             {/* Hero Section */}
-            <header className="min-h-screen flex flex-col justify-center items-center text-center px-6 relative overflow-hidden pt-20">
+            <header id="about" className="min-h-screen flex flex-col justify-center items-center text-center px-6 relative overflow-hidden pt-20">
                 <div className="absolute inset-0 -z-10 opacity-20 pointer-events-none">
                     <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500 rounded-full blur-[120px]" />
                     <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-cyan-500 rounded-full blur-[120px]" />
@@ -120,49 +135,51 @@ export default function App() {
 
                 <motion.div
                     initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8 }}
-                    className="relative mb-8"
+                    className="relative mb-6 md:mb-8"
                 >
-                    <div className="w-32 h-32 md:w-48 md:h-48 rounded-full border-4 border-blue-500 p-1 overflow-hidden">
+                    <div className="w-28 h-28 md:w-48 md:h-48 rounded-full border-4 border-blue-500 p-1 overflow-hidden">
                         <img src={MyImg} alt="Treepaech" className="w-full h-full object-cover rounded-full" />
                     </div>
-                    <div className="absolute -bottom-2 -right-2 bg-blue-500 p-2 rounded-full shadow-lg">
-                        <Award className="w-6 h-6 text-white" />
+                    <div className="absolute -bottom-1 -right-1 bg-blue-500 p-1.5 md:p-2 rounded-full shadow-lg">
+                        <Award className="w-5 h-5 md:w-6 md:h-6 text-white" />
                     </div>
                 </motion.div>
 
                 <motion.h1
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
-                    className="text-4xl md:text-6xl font-extrabold mb-4 bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent"
+                    className="text-3xl md:text-6xl font-extrabold mb-3 md:mb-4 bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent px-4"
                 >
                     Treepaech Treechan
                 </motion.h1>
                 <motion.p
                     initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
-                    className="text-xl md:text-2xl font-bold text-slate-600 dark:text-slate-400 mb-6"
+                    className="text-lg md:text-2xl font-bold text-slate-600 dark:text-slate-400 mb-4 md:mb-6 px-4"
                 >
-                    Computer Engineer | Full-Stack Developer
+                    {t('hero.role')}
                 </motion.p>
                 <motion.div
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
-                    className="max-w-2xl text-slate-500 dark:text-slate-400 leading-relaxed mb-8 px-4"
+                    className="max-w-2xl text-slate-500 dark:text-slate-400 leading-relaxed mb-6 md:mb-8 px-6 text-sm md:text-base"
                 >
-                    Recent graduate from Khon Kaen University with <strong>3.43 GPA, Second Class Honors</strong>.
-                    Determined to apply academic knowledge to real-world challenges,
-                    with experience in IoT, Web Development, and AI.
+                    <Trans i18nKey="hero.about">
+                        Recent graduate from Khon Kaen University with <strong>3.43 GPA, Second Class Honors</strong>.
+                        Determined to apply academic knowledge to real-world challenges,
+                        with experience in IoT, Web Development, and AI.
+                    </Trans>
                 </motion.div>
 
-                <div className="flex flex-wrap justify-center gap-4 mb-12">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-full text-sm font-medium">
-                        <GraduationCap className="w-4 h-4" /> B.Eng Computer Engineering
+                <div className="flex flex-wrap justify-center gap-3 md:gap-4 mb-8 md:mb-12 px-4">
+                    <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-full text-[11px] md:text-sm font-medium">
+                        <GraduationCap className="w-3.5 h-3.5 md:w-4 md:h-4" /> {t('hero.degree')}
                     </div>
-                    <div className="flex items-center gap-2 px-4 py-2 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-600 rounded-full text-sm font-medium">
-                        <MapPin className="w-4 h-4" /> Khon Kaen, Thailand
+                    <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-cyan-50 dark:bg-cyan-900/20 text-cyan-600 rounded-full text-[11px] md:text-sm font-medium">
+                        <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4" /> {t('hero.location')}
                     </div>
                 </div>
 
-                <div className="absolute bottom-10 animate-bounce text-slate-400 flex flex-col items-center gap-2">
-                    <span className="text-xs font-bold tracking-widest uppercase">My Journey</span>
-                    <ChevronDown className="w-6 h-6" />
+                <div className="mt-4 md:absolute md:bottom-10 animate-bounce text-slate-400 flex flex-col items-center gap-2 pb-10 md:pb-0">
+                    <span className="text-[10px] font-bold tracking-widest uppercase">{t('hero.journey')}</span>
+                    <ChevronDown className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
             </header>
 
@@ -171,174 +188,16 @@ export default function App() {
                 <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-slate-200 dark:bg-slate-800 md:block hidden" />
 
                 <div className="space-y-32">
-                    {years.map((year, idx) => (
-                        <section key={year} id={`year-${year}`} className="relative scroll-mt-24">
-                            {/* Year Marker */}
-                            <div className="md:absolute md:left-1/2 md:-translate-x-1/2 top-0 z-10 flex justify-center mb-6 md:mb-0">
-                                <span className="px-6 py-2 rounded-full border-2 border-blue-500 bg-white dark:bg-slate-900 text-blue-500 font-bold text-lg shadow-xl">
-                                    {year}
-                                </span>
-                            </div>
-
-                            <div className={`flex flex-col md:flex-row items-center gap-8 md:pt-12 ${idx % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
-                                {/* Content Card */}
-                                <div className="w-full md:w-[45%]">
-                                    <motion.div
-                                        initial={{ opacity: 0, x: idx % 2 === 0 ? 50 : -50 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
-                                        className="p-8 rounded-3xl bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-800 shadow-2xl backdrop-blur-sm"
-                                    >
-                                        <h3 className="text-2xl font-bold mb-4 text-blue-600 dark:text-blue-400">
-                                            {timelineData[year]?.title}
-                                        </h3>
-                                        <p className="text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
-                                            {timelineData[year]?.description}
-                                        </p>
-                                        <ul className="space-y-4">
-                                            {timelineData[year]?.achievements.map((item, i) => (
-                                                <li key={i} className="flex gap-3 text-sm">
-                                                    <CheckCircle2 className="w-5 h-5 text-blue-500 shrink-0" />
-                                                    <span className="text-slate-600 dark:text-slate-300">{item}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </motion.div>
-                                </div>
-
-                                {/* Image/Media */}
-                                <div className="w-full md:w-[45%]">
-                                    <motion.div
-                                        initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }} viewport={{ once: true }}
-                                        className="rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800"
-                                    >
-                                        <img
-                                            src={timelineData[year]?.image}
-                                            alt={timelineData[year]?.title}
-                                            className="w-full h-auto object-cover transform hover:scale-105 transition-transform duration-500"
-                                        />
-                                    </motion.div>
-                                </div>
-                            </div>
-                        </section>
-                    ))}
+                    <Year2022 onViewDetails={handleViewDetails} />
+                    <Year2023 onViewDetails={handleViewDetails} />
+                    <Year2024 onViewDetails={handleViewDetails} />
                 </div>
             </main>
-
-            {/* Additional Projects (Optional Grid) */}
-            {/* Notable Projects Section */}
-            <section className="max-w-6xl mx-auto px-6 py-20 border-t border-slate-100 dark:border-slate-800">
-                <h2 className="text-3xl font-bold mb-12 text-center">Notable Projects</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {[
-                        {
-                            title: "Home Loan Sim",
-                            img: ProjectCloudAppImg,
-                            desc: "3-year repayment calculation tool.",
-                            fullDesc: "A specialized financial tool developed to simulate 3-year repayment plans for home loans. It helps users understand interest rates, principal reductions, and payment schedules over time.",
-                            tech: ["JavaScript", "CSS Modeling", "Financial Logic"],
-                            link: "#"
-                        },
-                        {
-                            title: "Garbage AI",
-                            img: AIMiniprojectImg,
-                            desc: "Vision AI for waste classification.",
-                            fullDesc: "An AI-powered application that uses computer vision to identify and classify different types of garbage. Aimed at helping users automate waste sorting and improve recycling efficiency.",
-                            tech: ["Python", "TensorFlow", "Computer Vision", "React"],
-                            link: "#"
-                        },
-                        {
-                            title: "BLE Control",
-                            img: BleImg,
-                            desc: "Wireless hardware control via BLE.",
-                            fullDesc: "A hardare-software integration project that allows wireless control of embedded systems using Bluetooth Low Energy (BLE). Focuses on low-latency communication and power efficiency.",
-                            tech: ["NRF52840", "C++", "Bluetooth Stack", "Mobile App"],
-                            link: "#"
-                        }
-                    ].map((proj, i) => (
-                        <motion.div
-                            key={i}
-                            whileHover={{ y: -5 }}
-                            onClick={() => setSelectedProject(proj)}
-                            className="group cursor-pointer rounded-2xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-800 shadow-lg hover:shadow-xl transition-all"
-                        >
-                            <div className="h-48 overflow-hidden relative">
-                                <img src={proj.img} alt={proj.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/20 transition-colors flex items-center justify-center">
-                                    <span className="opacity-0 group-hover:opacity-100 bg-white text-blue-600 px-4 py-2 rounded-full text-xs font-bold transform translate-y-4 group-hover:translate-y-0 transition-all">View Details</span>
-                                </div>
-                            </div>
-                            <div className="p-6">
-                                <h4 className="font-bold mb-2 group-hover:text-blue-500 transition-colors">{proj.title}</h4>
-                                <p className="text-sm text-slate-500 dark:text-slate-400">{proj.desc}</p>
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
-            </section>
-
-            {/* Project Modal */}
-            <AnimatePresence>
-                {selectedProject && (
-                    <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4 md:p-6">
-                        <motion.div
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            onClick={() => setSelectedProject(null)}
-                            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-                        />
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-2xl overflow-y-auto max-h-[90vh]"
-                        >
-                            <button
-                                onClick={() => setSelectedProject(null)}
-                                className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-red-500 hover:text-white transition-colors z-10"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-
-                            <div className="h-64 sm:h-80 overflow-hidden">
-                                <img src={selectedProject.img} alt={selectedProject.title} className="w-full h-full object-cover" />
-                            </div>
-
-                            <div className="p-8">
-                                <h3 className="text-3xl font-extrabold mb-4 bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                                    {selectedProject.title}
-                                </h3>
-
-                                <div className="flex flex-wrap gap-2 mb-6">
-                                    {selectedProject.tech.map((t, i) => (
-                                        <span key={i} className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full">
-                                            {t}
-                                        </span>
-                                    ))}
-                                </div>
-
-                                <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-8">
-                                    {selectedProject.fullDesc}
-                                </p>
-
-                                <div className="flex gap-4">
-                                    <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors">
-                                        <ExternalLink className="w-4 h-4" /> Live Demo
-                                    </button>
-                                    <button
-                                        onClick={() => setSelectedProject(null)}
-                                        className="flex-1 py-3 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold rounded-xl transition-colors"
-                                    >
-                                        Close
-                                    </button>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
 
             {/* Footer */}
             <footer className="py-20 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors">
                 <div className="max-w-6xl mx-auto px-6 text-center">
-                    <p className="text-xl font-bold text-blue-600 mb-4">Let's Connect</p>
+                    <p className="text-xl font-bold text-blue-600 mb-4">{t('footer.connect')}</p>
                     <div className="flex flex-wrap justify-center gap-6 mb-12">
                         <a href={`mailto:${import.meta.env.VITE_EMAIL}`} className="flex items-center gap-2 hover:text-blue-500 transition-colors">
                             <Mail className="w-5 h-5" /> {import.meta.env.VITE_EMAIL}
@@ -354,7 +213,7 @@ export default function App() {
                             </a>
                         ))}
                     </div>
-                    <p className="text-slate-500 text-sm">&copy; {new Date().getFullYear()} Treepaech Treechan. Built with React & Tailwind.</p>
+                    <p className="text-slate-500 text-sm">&copy; {new Date().getFullYear()} Treepaech Treechan. {t('footer.builtWith')}.</p>
                 </div>
             </footer>
 
@@ -365,6 +224,14 @@ export default function App() {
             >
                 <ArrowUp className="w-6 h-6" />
             </button>
+
+            {/* Project Details Modal */}
+            <ProjectModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                projectKey={selectedProject?.key}
+                image={selectedProject?.image}
+            />
         </div>
     );
 }
