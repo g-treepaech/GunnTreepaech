@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    scroll-behavior: smooth;
+}
+
+body {
+    @apply font-inter bg-bg-light text-slate-900 transition-colors duration-300;
+}
+
+body[data-theme='dark'] {
+    @apply bg-bg-dark text-slate-100;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-primary-light/20 hover:bg-primary-light/40 rounded-full transition-colors;
+}
+
+.timeline-line-gradient {
+    background: linear-gradient(to bottom, transparent, theme('colors.blue.500'), theme('colors.blue.500'), transparent);
+}
