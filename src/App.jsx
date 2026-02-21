@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { motion, useScroll, useSpring } from 'framer-motion'
-import { Moon, Sun, ChevronDown, ArrowUp, Github, Linkedin, Twitter, CheckCircle2, FileText, Mail, Phone, MapPin, GraduationCap, Award } from 'lucide-react'
+import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion'
+import { Moon, Sun, ChevronDown, ArrowUp, Github, Linkedin, Twitter, CheckCircle2, FileText, Mail, Phone, MapPin, GraduationCap, Award, X, ExternalLink } from 'lucide-react'
 
 // Images
 import InternshipImg from './image/Internship.jpg'
@@ -44,8 +44,7 @@ const timelineData = {
         achievements: [
             "Analyzed Calico, Flannel, and Cilium performance",
             "Conducted tests on physical Raspberry Pi 4 hardware",
-            "Utilized virtual simulators for large-scale testing",
-            "Graduated with 3.43 GPA, Second Class Honors"
+            "Utilized virtual simulators for large-scale testing"
         ],
         image: SeniorProjectImg
     }
@@ -56,6 +55,7 @@ const years = [2022, 2023, 2024];
 export default function App() {
     const [isDark, setIsDark] = useState(false);
     const [showBackToTop, setShowBackToTop] = useState(false);
+    const [selectedProject, setSelectedProject] = useState(null);
     const { scrollYProgress } = useScroll();
     const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
@@ -146,7 +146,7 @@ export default function App() {
                     initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
                     className="max-w-2xl text-slate-500 dark:text-slate-400 leading-relaxed mb-8 px-4"
                 >
-                    Recent graduate from Khon Kaen University with Second Class Honors.
+                    Recent graduate from Khon Kaen University with <strong>3.43 GPA, Second Class Honors</strong>.
                     Determined to apply academic knowledge to real-world challenges,
                     with experience in IoT, Web Development, and AI.
                 </motion.div>
@@ -180,7 +180,7 @@ export default function App() {
                                 </span>
                             </div>
 
-                            <div className={`flex flex-col md:flex-row items-center gap-8 ${idx % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
+                            <div className={`flex flex-col md:flex-row items-center gap-8 md:pt-12 ${idx % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
                                 {/* Content Card */}
                                 <div className="w-full md:w-[45%]">
                                     <motion.div
@@ -224,37 +224,127 @@ export default function App() {
             </main>
 
             {/* Additional Projects (Optional Grid) */}
+            {/* Notable Projects Section */}
             <section className="max-w-6xl mx-auto px-6 py-20 border-t border-slate-100 dark:border-slate-800">
                 <h2 className="text-3xl font-bold mb-12 text-center">Notable Projects</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {[
-                        { title: "Home Loan Sim", img: ProjectCloudAppImg, desc: "3-year repayment calculation tool." },
-                        { title: "Garbage AI", img: AIMiniprojectImg, desc: "Vision AI for waste classification." },
-                        { title: "BLE Control", img: BleImg, desc: "Wireless hardware control via BLE." }
+                        {
+                            title: "Home Loan Sim",
+                            img: ProjectCloudAppImg,
+                            desc: "3-year repayment calculation tool.",
+                            fullDesc: "A specialized financial tool developed to simulate 3-year repayment plans for home loans. It helps users understand interest rates, principal reductions, and payment schedules over time.",
+                            tech: ["JavaScript", "CSS Modeling", "Financial Logic"],
+                            link: "#"
+                        },
+                        {
+                            title: "Garbage AI",
+                            img: AIMiniprojectImg,
+                            desc: "Vision AI for waste classification.",
+                            fullDesc: "An AI-powered application that uses computer vision to identify and classify different types of garbage. Aimed at helping users automate waste sorting and improve recycling efficiency.",
+                            tech: ["Python", "TensorFlow", "Computer Vision", "React"],
+                            link: "#"
+                        },
+                        {
+                            title: "BLE Control",
+                            img: BleImg,
+                            desc: "Wireless hardware control via BLE.",
+                            fullDesc: "A hardare-software integration project that allows wireless control of embedded systems using Bluetooth Low Energy (BLE). Focuses on low-latency communication and power efficiency.",
+                            tech: ["NRF52840", "C++", "Bluetooth Stack", "Mobile App"],
+                            link: "#"
+                        }
                     ].map((proj, i) => (
-                        <div key={i} className="group rounded-2xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-800 shadow-lg hover:shadow-xl transition-all">
-                            <div className="h-48 overflow-hidden">
+                        <motion.div
+                            key={i}
+                            whileHover={{ y: -5 }}
+                            onClick={() => setSelectedProject(proj)}
+                            className="group cursor-pointer rounded-2xl overflow-hidden bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-800 shadow-lg hover:shadow-xl transition-all"
+                        >
+                            <div className="h-48 overflow-hidden relative">
                                 <img src={proj.img} alt={proj.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/20 transition-colors flex items-center justify-center">
+                                    <span className="opacity-0 group-hover:opacity-100 bg-white text-blue-600 px-4 py-2 rounded-full text-xs font-bold transform translate-y-4 group-hover:translate-y-0 transition-all">View Details</span>
+                                </div>
                             </div>
                             <div className="p-6">
-                                <h4 className="font-bold mb-2">{proj.title}</h4>
+                                <h4 className="font-bold mb-2 group-hover:text-blue-500 transition-colors">{proj.title}</h4>
                                 <p className="text-sm text-slate-500 dark:text-slate-400">{proj.desc}</p>
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
             </section>
+
+            {/* Project Modal */}
+            <AnimatePresence>
+                {selectedProject && (
+                    <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4 md:p-6">
+                        <motion.div
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            onClick={() => setSelectedProject(null)}
+                            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl overflow-hidden shadow-2xl overflow-y-auto max-h-[90vh]"
+                        >
+                            <button
+                                onClick={() => setSelectedProject(null)}
+                                className="absolute top-4 right-4 p-2 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-red-500 hover:text-white transition-colors z-10"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+
+                            <div className="h-64 sm:h-80 overflow-hidden">
+                                <img src={selectedProject.img} alt={selectedProject.title} className="w-full h-full object-cover" />
+                            </div>
+
+                            <div className="p-8">
+                                <h3 className="text-3xl font-extrabold mb-4 bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
+                                    {selectedProject.title}
+                                </h3>
+
+                                <div className="flex flex-wrap gap-2 mb-6">
+                                    {selectedProject.tech.map((t, i) => (
+                                        <span key={i} className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full">
+                                            {t}
+                                        </span>
+                                    ))}
+                                </div>
+
+                                <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-8">
+                                    {selectedProject.fullDesc}
+                                </p>
+
+                                <div className="flex gap-4">
+                                    <button className="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors">
+                                        <ExternalLink className="w-4 h-4" /> Live Demo
+                                    </button>
+                                    <button
+                                        onClick={() => setSelectedProject(null)}
+                                        className="flex-1 py-3 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold rounded-xl transition-colors"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* Footer */}
             <footer className="py-20 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-colors">
                 <div className="max-w-6xl mx-auto px-6 text-center">
                     <p className="text-xl font-bold text-blue-600 mb-4">Let's Connect</p>
                     <div className="flex flex-wrap justify-center gap-6 mb-12">
-                        <a href="mailto:treepaech.t@email.com" className="flex items-center gap-2 hover:text-blue-500 transition-colors">
-                            <Mail className="w-5 h-5" /> treepaech.t@email.com
+                        <a href={`mailto:${import.meta.env.VITE_EMAIL}`} className="flex items-center gap-2 hover:text-blue-500 transition-colors">
+                            <Mail className="w-5 h-5" /> {import.meta.env.VITE_EMAIL}
                         </a>
-                        <a href="tel:+66xxxxxxxx" className="flex items-center gap-2 hover:text-blue-500 transition-colors">
-                            <Phone className="w-5 h-5" /> +66 XX XXX XXXX
+                        <a href={`tel:${import.meta.env.VITE_PHONE}`} className="flex items-center gap-2 hover:text-blue-500 transition-colors">
+                            <Phone className="w-5 h-5" /> {import.meta.env.VITE_PHONE}
                         </a>
                     </div>
                     <div className="flex justify-center gap-6 mb-8">
