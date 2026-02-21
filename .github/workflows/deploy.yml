@@ -28,8 +28,8 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_EMAIL: ${{ vars.VITE_EMAIL }}
-          VITE_PHONE: ${{ vars.VITE_PHONE }}
+          VITE_EMAIL: ${{ secrets.VITE_EMAIL }}
+          VITE_PHONE: ${{ secrets.VITE_PHONE }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
