@@ -1,7 +1,9 @@
 const th = {
     nav: {
         about: "โปรไฟล์",
-        downloadCV: "ดาวน์โหลด CV"
+        download: "ดาวน์โหลด",
+        cv: "ประวัติย่อ (CV)",
+        resume: "เรซูเม่ (Resume)"
     },
     hero: {
         role: "วิศวกรคอมพิวเตอร์ | นักพัฒนา Full-Stack",

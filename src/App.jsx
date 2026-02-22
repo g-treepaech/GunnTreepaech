@@ -12,40 +12,34 @@ import AIMiniprojectImg from './image/AIMiniproject.png'
 import BleImg from './image/BleWirelessConnectionSystem.png'
 import MyImg from './image/My.jpg'
 import CVFile from './Documents/Treepaech_CV.pdf'
+import ResumeFile from './Documents/Treepaech_Resume.pdf'
 
 import TimelineCard from './components/TimelineCard'
 import YearSection from './components/YearSection'
 import ProjectModal from './components/ProjectModal'
+import DownloadDropdown from './components/DownloadDropdown'
 
 const years = [2022, 2023, 2024];
 
-// Year Components (Outside App to prevent re-creation/re-mounting)
-const Year2022 = ({ onViewDetails }) => (
-    <YearSection year={2022}>
-        <TimelineCard index={0} item={{ image: ProjectACPImg, key: 'healthCalendar' }} onViewDetails={onViewDetails} />
-    </YearSection>
-);
-
-const Year2023 = ({ onViewDetails }) => (
-    <YearSection year={2023}>
-        <TimelineCard index={1} item={{ image: InternshipImg, key: 'internship' }} onViewDetails={onViewDetails} />
-        <TimelineCard index={2} item={{ image: AIMiniprojectImg, key: 'garbageAI' }} onViewDetails={onViewDetails} />
-        <TimelineCard index={3} item={{ image: BleImg, key: 'bleControl' }} onViewDetails={onViewDetails} />
-        <TimelineCard index={4} item={{ image: ProjectCloudAppImg, key: 'homeLoan' }} onViewDetails={onViewDetails} />
-    </YearSection>
-);
-
-const Year2024 = ({ onViewDetails }) => (
-    <YearSection year={2024}>
-        <TimelineCard index={5} item={{ image: SeniorProjectImg, key: 'seniorProject' }} onViewDetails={onViewDetails} />
-    </YearSection>
-);
+const timelineData = [
+    { year: 2022, key: 'healthCalendar', image: ProjectACPImg },
+    { year: 2023, key: 'internship', image: InternshipImg },
+    { year: 2023, key: 'garbageAI', image: AIMiniprojectImg },
+    { year: 2023, key: 'bleControl', image: BleImg },
+    { year: 2023, key: 'homeLoan', image: ProjectCloudAppImg },
+    { year: 2024, key: 'seniorProject', image: SeniorProjectImg },
+];
 
 export default function App() {
     const [isDark, setIsDark] = useState(false);
     const [showBackToTop, setShowBackToTop] = useState(false);
     const [selectedProject, setSelectedProject] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const downloadOptions = [
+        { labelKey: 'nav.cv', file: CVFile },
+        { labelKey: 'nav.resume', file: ResumeFile },
+    ];
 
     const { t, i18n } = useTranslation();
     const { scrollYProgress } = useScroll();
@@ -116,9 +110,7 @@ export default function App() {
                                 </div>
                             )}
                         </button>
-                        <a href={CVFile} download className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-full transition-all">
-                            <FileText className="w-4 h-4" /> {t('nav.downloadCV')}
-                        </a>
+                        <DownloadDropdown options={downloadOptions} />
                         <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                             {isDark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
                         </button>
@@ -188,9 +180,24 @@ export default function App() {
                 <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-slate-200 dark:bg-slate-800 md:block hidden" />
 
                 <div className="space-y-32">
-                    <Year2022 onViewDetails={handleViewDetails} />
-                    <Year2023 onViewDetails={handleViewDetails} />
-                    <Year2024 onViewDetails={handleViewDetails} />
+                    {years.map(year => (
+                        <YearSection key={year} year={year}>
+                            {timelineData
+                                .filter(item => item.year === year)
+                                .map((item) => {
+                                    // Find absolute index for alternating layout
+                                    const absoluteIndex = timelineData.indexOf(item);
+                                    return (
+                                        <TimelineCard
+                                            key={item.key}
+                                            index={absoluteIndex}
+                                            item={item}
+                                            onViewDetails={handleViewDetails}
+                                        />
+                                    );
+                                })}
+                        </YearSection>
+                    ))}
                 </div>
             </main>
 

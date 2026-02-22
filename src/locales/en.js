@@ -1,7 +1,9 @@
 const en = {
     nav: {
         about: "Profile",
-        downloadCV: "Download CV"
+        download: "Download",
+        cv: "Curriculum Vitae (CV)",
+        resume: "Resume"
     },
     hero: {
         role: "Computer Engineer | Full-Stack Developer",
